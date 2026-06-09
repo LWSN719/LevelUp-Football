@@ -14,6 +14,7 @@ import {
 import { auth, googleProvider, db } from "./firebase";
 import PlayerCard from "./components/PlayerCard";
 import levelUpLogo from "./assets/levelup-logo.png";
+import Navbar from "./components/Navbar";
 import "./App.css";
 
 function App() {
@@ -472,42 +473,14 @@ function App() {
 
   return (
     <div className="app">
-      <nav className="top-nav">
-        <div className="nav-brand" onClick={() => goToPage("home")}>
-          LevelUp Football
-        </div>
-
-        <div className="nav-links">
-          <button onClick={() => goToPage("home")}>Home</button>
-          <button onClick={() => goToPage("cards")}>Player Cards</button>
-          <button onClick={() => goToPage("teams")}>Teams</button>
-
-          {isLoggedIn ? (
-            <>
-              <span className="account-pill">
-                {user?.displayName ||
-                  (accountType === "coach"
-                    ? "Coach Account"
-                    : "Parent Account")}
-              </span>
-
-              <button className="login-btn" onClick={logout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="login-btn" onClick={() => goToPage("login")}>
-                Login
-              </button>
-
-              <button className="signup-btn" onClick={() => goToPage("signup")}>
-                Sign Up
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
+      
+    <Navbar
+  isLoggedIn={isLoggedIn}
+  accountType={accountType}
+  user={user}
+  goToPage={goToPage}
+  logout={logout}
+/>
 
       {renderPage()}
     </div>
