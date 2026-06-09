@@ -19,6 +19,7 @@ import PlayerCard from "./components/PlayerCard";
 import SavedPlayers from "./components/SavedPlayers";
 import TeamDashboard from "./components/TeamDashboard";
 import LandingPage from "./components/LandingPage";
+import AuthPage from "./components/AuthPage";
 import "./App.css";
 
 function App() {
@@ -342,100 +343,24 @@ function App() {
     }
 
     if (page === "login") {
-      return (
-        <section className="page-card">
-          <h1>Login</h1>
-          <p>Sign in with Google and choose your account type.</p>
+  return (
+    <AuthPage
+      title="Login"
+      description="Sign in with Google and choose your account type."
+      loginWithGoogle={loginWithGoogle}
+    />
+  );
+}
 
-          <div className="hero-actions">
-            <button
-              className="login-btn"
-              onClick={() => loginWithGoogle("coach")}
-            >
-              Login as Coach
-            </button>
-
-            <button
-              className="signup-btn"
-              onClick={() => loginWithGoogle("parent")}
-            >
-              Login as Parent
-            </button>
-          </div>
-        </section>
-      );
-    }
-
-    if (page === "signup") {
-      return (
-        <section className="page-card">
-          <h1>Create Account</h1>
-          <p>Choose how you want to use LevelUp Football.</p>
-
-          <div className="hero-actions">
-            <button
-              className="signup-btn"
-              onClick={() => loginWithGoogle("parent")}
-            >
-              Parent Account
-            </button>
-
-            <button
-              className="login-btn"
-              onClick={() => loginWithGoogle("coach")}
-            >
-              Coach Account
-            </button>
-          </div>
-        </section>
-      );
-    }
-
-    if (isLoggedIn && page === "cards") {
-      return (
-        <>
-          <section className="dashboard-header">
-            <p className="eyebrow">
-              {accountType === "coach" ? "Coach Dashboard" : "Parent Dashboard"}
-            </p>
-
-            <h1>
-              {selectedPlayerId ? "Update Player Card" : "Create Player Card"}
-            </h1>
-
-            <p>
-              {selectedPlayerId
-                ? "You are editing a saved player card."
-                : "Build a digital player card with photos, stats, strengths, and notes."}
-            </p>
-          </section>
-
-          <main className="card-builder">
-            <PlayerForm
-              player={player}
-              handleChange={handleChange}
-              handlePhotoUpload={handlePhotoUpload}
-              accountType={accountType}
-              savePlayerCard={savePlayerCard}
-              updatePlayerCard={updatePlayerCard}
-              startNewCard={startNewCard}
-              selectedPlayerId={selectedPlayerId}
-            />
-
-            <section className="preview-section">
-              <h2>Player Card Preview</h2>
-              <PlayerCard player={player} />
-            </section>
-          </main>
-
-          <SavedPlayers
-            savedPlayers={savedPlayers}
-            loadPlayerIntoForm={loadPlayerIntoForm}
-            deletePlayerCard={deletePlayerCard}
-          />
-        </>
-      );
-    }
+   if (page === "signup") {
+  return (
+    <AuthPage
+      title="Create Account"
+      description="Choose how you want to use LevelUp Football."
+      loginWithGoogle={loginWithGoogle}
+    />
+  );
+}
 
     if (isLoggedIn && page === "teams") {
       return (
