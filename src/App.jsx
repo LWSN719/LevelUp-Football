@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { signInWithPopup, signOut } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import {
   collection,
   addDoc,
@@ -14,18 +14,20 @@ import {
 
 import { auth, googleProvider, db } from "./firebase";
 import Navbar from "./components/Navbar";
+import LandingPage from "./components/LandingPage";
+import AuthPage from "./components/AuthPage";
 import PlayerForm from "./components/PlayerForm";
 import PlayerCard from "./components/PlayerCard";
 import SavedPlayers from "./components/SavedPlayers";
 import TeamDashboard from "./components/TeamDashboard";
-import LandingPage from "./components/LandingPage";
-import AuthPage from "./components/AuthPage";
 import "./App.css";
 
 function App() {
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(localStorage.getItem("page") || "home");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [accountType, setAccountType] = useState("");
+  const [accountType, setAccountType] = useState(
+    localStorage.getItem("accountType") || ""
+  );
   const [user, setUser] = useState(null);
 
   const [savedPlayers, setSavedPlayers] = useState([]);
@@ -60,25 +62,8 @@ function App() {
 
   const goToPage = (newPage) => {
     setPage(newPage);
+    localStorage.setItem("page", newPage);
     window.scrollTo(0, 0);
-  };
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setPlayer({ ...player, [name]: value });
-  };
-
-  const handlePhotoUpload = (event) => {
-    const file = event.target.files[0];
-
-    if (file) {
-      setPlayer({ ...player, photo: URL.createObjectURL(file) });
-    }
-  };
-
-  const handleTeamChange = (event) => {
-    const { name, value } = event.target;
-    setTeam({ ...team, [name]: value });
   };
 
   const loadSavedPlayers = async (currentUser) => {
@@ -100,7 +85,6 @@ function App() {
       setSavedPlayers(players);
     } catch (error) {
       console.error("Error loading saved players:", error);
-      alert("Something went wrong loading saved players.");
     }
   };
 
@@ -123,8 +107,42 @@ function App() {
       setSavedTeams(teams);
     } catch (error) {
       console.error("Error loading teams:", error);
-      alert("Something went wrong loading teams.");
     }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        setIsLoggedIn(true);
+
+        await loadSavedPlayers(currentUser);
+        await loadSavedTeams(currentUser);
+      } else {
+        setUser(null);
+        setIsLoggedIn(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setPlayer({ ...player, [name]: value });
+  };
+
+  const handlePhotoUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      setPlayer({ ...player, photo: URL.createObjectURL(file) });
+    }
+  };
+
+  const handleTeamChange = (event) => {
+    const { name, value } = event.target;
+    setTeam({ ...team, [name]: value });
   };
 
   const loginWithGoogle = async (type) => {
@@ -134,6 +152,7 @@ function App() {
       setUser(result.user);
       setIsLoggedIn(true);
       setAccountType(type);
+      localStorage.setItem("accountType", type);
 
       await loadSavedPlayers(result.user);
       await loadSavedTeams(result.user);
@@ -159,6 +178,8 @@ function App() {
     setSavedTeams([]);
     setSelectedPlayerId(null);
     setPlayer(emptyPlayer);
+
+    localStorage.removeItem("accountType");
     goToPage("home");
   };
 
@@ -304,8 +325,8 @@ function App() {
 
   const renderPage = () => {
     if (page === "home") {
-  return <LandingPage goToPage={goToPage} />;
-}
+      return <LandingPage goToPage={goToPage} />;
+    }
 
     if (page === "cards" && !isLoggedIn) {
       return (
@@ -343,24 +364,70 @@ function App() {
     }
 
     if (page === "login") {
-  return (
-    <AuthPage
-      title="Login"
-      description="Sign in with Google and choose your account type."
-      loginWithGoogle={loginWithGoogle}
-    />
-  );
-}
+      return (
+        <AuthPage
+          title="Login"
+          description="Sign in with Google and choose your account type."
+          loginWithGoogle={loginWithGoogle}
+        />
+      );
+    }
 
-   if (page === "signup") {
-  return (
-    <AuthPage
-      title="Create Account"
-      description="Choose how you want to use LevelUp Football."
-      loginWithGoogle={loginWithGoogle}
-    />
-  );
-}
+    if (page === "signup") {
+      return (
+        <AuthPage
+          title="Create Account"
+          description="Choose how you want to use LevelUp Football."
+          loginWithGoogle={loginWithGoogle}
+        />
+      );
+    }
+
+    if (isLoggedIn && page === "cards") {
+      return (
+        <>
+          <section className="dashboard-header">
+            <p className="eyebrow">
+              {accountType === "coach" ? "Coach Dashboard" : "Parent Dashboard"}
+            </p>
+
+            <h1>
+              {selectedPlayerId ? "Update Player Card" : "Create Player Card"}
+            </h1>
+
+            <p>
+              {selectedPlayerId
+                ? "You are editing a saved player card."
+                : "Build a digital player card with photos, stats, strengths, and notes."}
+            </p>
+          </section>
+
+          <main className="card-builder">
+            <PlayerForm
+              player={player}
+              handleChange={handleChange}
+              handlePhotoUpload={handlePhotoUpload}
+              accountType={accountType}
+              savePlayerCard={savePlayerCard}
+              updatePlayerCard={updatePlayerCard}
+              startNewCard={startNewCard}
+              selectedPlayerId={selectedPlayerId}
+            />
+
+            <section className="preview-section">
+              <h2>Player Card Preview</h2>
+              <PlayerCard player={player} />
+            </section>
+          </main>
+
+          <SavedPlayers
+            savedPlayers={savedPlayers}
+            loadPlayerIntoForm={loadPlayerIntoForm}
+            deletePlayerCard={deletePlayerCard}
+          />
+        </>
+      );
+    }
 
     if (isLoggedIn && page === "teams") {
       return (
@@ -374,7 +441,7 @@ function App() {
       );
     }
 
-    return null;
+    return <LandingPage goToPage={goToPage} />;
   };
 
   return (
