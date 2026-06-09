@@ -4,6 +4,7 @@ import levelUpLogo from "./assets/levelup-logo.png";
 import "./App.css";
 
 function App() {
+  const [page, setPage] = useState("home");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountType, setAccountType] = useState("");
 
@@ -24,171 +25,181 @@ function App() {
     coachNote: "",
   });
 
+  const goToPage = (newPage) => {
+    setPage(newPage);
+    window.scrollTo(0, 0);
+  };
+
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    setPlayer({
-      ...player,
-      [name]: value,
-    });
+    setPlayer({ ...player, [name]: value });
   };
 
   const handlePhotoUpload = (event) => {
     const file = event.target.files[0];
 
     if (file) {
-      setPlayer({
-        ...player,
-        photo: URL.createObjectURL(file),
-      });
+      setPlayer({ ...player, photo: URL.createObjectURL(file) });
     }
   };
 
   const loginAsParent = () => {
     setIsLoggedIn(true);
     setAccountType("parent");
+    goToPage("cards");
   };
 
   const loginAsCoach = () => {
     setIsLoggedIn(true);
     setAccountType("coach");
+    goToPage("teams");
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setAccountType("");
+    goToPage("home");
   };
 
-  return (
-    <div className="app">
-      <nav className="top-nav">
-        <div className="nav-brand">LevelUp Football</div>
+  const renderPage = () => {
+    if (page === "home") {
+      return (
+        <header className="landing-hero">
+          <img
+            src={levelUpLogo}
+            alt="LevelUp Football"
+            className="landing-logo"
+          />
 
-        <div className="nav-links">
-          <a href="#home">Home</a>
-          <a href="#cards-info">Player Cards</a>
-          <a href="#teams-info">Teams</a>
+          <p className="eyebrow">Youth Football Development Platform</p>
 
-          {isLoggedIn ? (
-            <>
-              <span className="account-pill">
-                {accountType === "coach" ? "Coach Account" : "Parent Account"}
-              </span>
-              <button className="login-btn" onClick={logout}>
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="login-btn" onClick={loginAsCoach}>
-                Coach Login
-              </button>
-              <button className="signup-btn" onClick={loginAsParent}>
-                Parent Sign Up
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
+          <h1>Get in the Game.</h1>
 
-      {!isLoggedIn ? (
-        <>
-          <header id="home" className="hero landing-hero">
-            <img
-              src={levelUpLogo}
-              alt="LevelUp Football"
-              style={{
-                width: "320px",
-                maxWidth: "320px",
-                height: "auto",
-                display: "block",
-                margin: "0 auto 1.5rem",
-              }}
-            />
+          <p className="hero-copy">
+            Create player cards, track progress, and give coaches and parents
+            one place to celebrate every athlete’s growth.
+          </p>
 
-            <p className="eyebrow">Youth Football Development Platform</p>
+          <div className="hero-actions">
+            <button className="signup-btn" onClick={() => goToPage("signup")}>
+              Create Account
+            </button>
 
-            <h1>Get in the Game.</h1>
+            <button className="login-btn" onClick={() => goToPage("login")}>
+              Login
+            </button>
+          </div>
 
-            <p className="hero-copy">
-              Create player cards, track progress, and give coaches and parents
-              one place to celebrate every athlete’s growth.
-            </p>
-
-            <div className="hero-actions">
-              <button className="signup-btn" onClick={loginAsParent}>
-                Sign Up as Parent
-              </button>
-
-              <button className="login-btn" onClick={loginAsCoach}>
-                Login as Coach
-              </button>
+          <div className="feature-grid">
+            <div className="feature-card">
+              <h3>Player Cards</h3>
+              <p>Digital rookie-style cards with photos, stats, and strengths.</p>
             </div>
 
-            <div className="feature-grid">
-              <div className="feature-card">
-                <h3>Player Cards</h3>
-                <p>
-                  Create custom digital cards with photos, stats, strengths,
-                  and notes.
-                </p>
-              </div>
-
-              <div className="feature-card">
-                <h3>Team Rosters</h3>
-                <p>
-                  Coaches can manage athletes and track development across the
-                  team.
-                </p>
-              </div>
-
-              <div className="feature-card">
-                <h3>Parent Access</h3>
-                <p>
-                  Parents can view progress, cards, and coach feedback in one
-                  place.
-                </p>
-              </div>
+            <div className="feature-card">
+              <h3>Team Rosters</h3>
+              <p>Coach-managed rosters built around player development.</p>
             </div>
-          </header>
 
-          <section id="cards-info" className="info-section">
-            <h2>Player Cards</h2>
-            <p>
-              Parents and coaches can create digital rookie-style cards with
-              player photos, stats, strengths, team info, and coach notes.
-            </p>
-          </section>
+            <div className="feature-card">
+              <h3>Parent Access</h3>
+              <p>Parents can follow progress and view their athlete’s card.</p>
+            </div>
+          </div>
+        </header>
+      );
+    }
 
-          <section id="teams-info" className="info-section">
-            <h2>Teams</h2>
-            <p>
-              Coaches will be able to create team pages, manage rosters, update
-              player strengths, and add development notes.
-            </p>
-          </section>
-        </>
-      ) : (
+    if (page === "cards" && !isLoggedIn) {
+      return (
+        <section className="page-card">
+          <h1>Player Cards</h1>
+          <p>
+            Create your own player cards or view your saved player cards by
+            logging in.
+          </p>
+          <p>
+            If you do not have an account, create one{" "}
+            <button className="text-link" onClick={() => goToPage("signup")}>
+              here
+            </button>
+            .
+          </p>
+        </section>
+      );
+    }
+
+    if (page === "teams" && !isLoggedIn) {
+      return (
+        <section className="page-card">
+          <h1>Teams</h1>
+          <p>
+            Team pages will allow coaches to manage rosters, view player cards,
+            update strengths, and add coach notes.
+          </p>
+          <p>
+            Coach tools are coming soon. Login or create an account to prepare
+            your team profile.
+          </p>
+        </section>
+      );
+    }
+
+    if (page === "login") {
+      return (
+        <section className="page-card">
+          <h1>Login</h1>
+          <p>Select an account type for now. Google login comes next.</p>
+
+          <div className="hero-actions">
+            <button className="login-btn" onClick={loginAsCoach}>
+              Login as Coach
+            </button>
+
+            <button className="signup-btn" onClick={loginAsParent}>
+              Login as Parent
+            </button>
+          </div>
+        </section>
+      );
+    }
+
+    if (page === "signup") {
+      return (
+        <section className="page-card">
+          <h1>Create Account</h1>
+          <p>Choose how you want to use LevelUp Football.</p>
+
+          <div className="hero-actions">
+            <button className="signup-btn" onClick={loginAsParent}>
+              Parent Account
+            </button>
+
+            <button className="login-btn" onClick={loginAsCoach}>
+              Coach Account
+            </button>
+          </div>
+        </section>
+      );
+    }
+
+    if (isLoggedIn && page === "cards") {
+      return (
         <>
           <section className="dashboard-header">
             <p className="eyebrow">
               {accountType === "coach" ? "Coach Dashboard" : "Parent Dashboard"}
             </p>
 
-            <h1>
-              {accountType === "coach"
-                ? "Manage Your Team"
-                : "Create Your Player Card"}
-            </h1>
+            <h1>Create Your Player Card</h1>
 
             <p>
-              {accountType === "coach"
-                ? "Update player strengths, add coach notes, and manage roster progress."
-                : "Build a digital player card that celebrates your athlete’s growth."}
+              Build a digital player card with photos, stats, strengths, and
+              notes.
             </p>
           </section>
 
-          <main id="cards" className="card-builder">
+          <main className="card-builder">
             <section className="form-card">
               <h2>Create Player Card</h2>
 
@@ -295,16 +306,67 @@ function App() {
               <PlayerCard player={player} />
             </section>
           </main>
-
-          <section id="teams" className="teams-preview">
-            <h2>Team Tools Coming Soon</h2>
-            <p>
-              Coaches will be able to create teams, manage rosters, update
-              player strengths, and add coach notes.
-            </p>
-          </section>
         </>
-      )}
+      );
+    }
+
+    if (isLoggedIn && page === "teams") {
+      return (
+        <section className="page-card">
+          <h1>Team Dashboard</h1>
+          <p>
+            Coaches will create teams, manage rosters, and update player cards
+            from here.
+          </p>
+
+          <div className="team-placeholder">
+            <h2>GAS Elite Mavericks</h2>
+            <p>Roster tools coming soon.</p>
+          </div>
+        </section>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="app">
+      <nav className="top-nav">
+        <div className="nav-brand" onClick={() => goToPage("home")}>
+          LevelUp Football
+        </div>
+
+        <div className="nav-links">
+          <button onClick={() => goToPage("home")}>Home</button>
+          <button onClick={() => goToPage("cards")}>Player Cards</button>
+          <button onClick={() => goToPage("teams")}>Teams</button>
+
+          {isLoggedIn ? (
+            <>
+              <span className="account-pill">
+                {accountType === "coach" ? "Coach Account" : "Parent Account"}
+              </span>
+
+              <button className="login-btn" onClick={logout}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="login-btn" onClick={() => goToPage("login")}>
+                Login
+              </button>
+
+              <button className="signup-btn" onClick={() => goToPage("signup")}>
+                Sign Up
+              </button>
+            </>
+          )}
+        </div>
+      </nav>
+
+      {renderPage()}
     </div>
   );
 }
