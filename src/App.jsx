@@ -11,12 +11,14 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
+
 import { auth, googleProvider, db } from "./firebase";
-import PlayerCard from "./components/PlayerCard";
-import levelUpLogo from "./assets/levelup-logo.png";
 import Navbar from "./components/Navbar";
-import SavedPlayers from "./components/SavedPlayers";
 import PlayerForm from "./components/PlayerForm";
+import PlayerCard from "./components/PlayerCard";
+import SavedPlayers from "./components/SavedPlayers";
+import TeamDashboard from "./components/TeamDashboard";
+import LandingPage from "./components/LandingPage";
 import "./App.css";
 
 function App() {
@@ -24,8 +26,17 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountType, setAccountType] = useState("");
   const [user, setUser] = useState(null);
+
   const [savedPlayers, setSavedPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
+
+  const [team, setTeam] = useState({
+    teamName: "",
+    organization: "",
+    ageGroup: "",
+  });
+
+  const [savedTeams, setSavedTeams] = useState([]);
 
   const emptyPlayer = {
     name: "",
@@ -64,6 +75,11 @@ function App() {
     }
   };
 
+  const handleTeamChange = (event) => {
+    const { name, value } = event.target;
+    setTeam({ ...team, [name]: value });
+  };
+
   const loadSavedPlayers = async (currentUser) => {
     if (!currentUser) return;
 
@@ -87,6 +103,29 @@ function App() {
     }
   };
 
+  const loadSavedTeams = async (currentUser) => {
+    if (!currentUser) return;
+
+    try {
+      const teamsQuery = query(
+        collection(db, "teams"),
+        where("coachId", "==", currentUser.uid)
+      );
+
+      const snapshot = await getDocs(teamsQuery);
+
+      const teams = snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+
+      setSavedTeams(teams);
+    } catch (error) {
+      console.error("Error loading teams:", error);
+      alert("Something went wrong loading teams.");
+    }
+  };
+
   const loginWithGoogle = async (type) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -96,6 +135,7 @@ function App() {
       setAccountType(type);
 
       await loadSavedPlayers(result.user);
+      await loadSavedTeams(result.user);
 
       if (type === "coach") {
         goToPage("teams");
@@ -115,6 +155,7 @@ function App() {
     setIsLoggedIn(false);
     setAccountType("");
     setSavedPlayers([]);
+    setSavedTeams([]);
     setSelectedPlayerId(null);
     setPlayer(emptyPlayer);
     goToPage("home");
@@ -188,6 +229,52 @@ function App() {
     }
   };
 
+  const saveTeam = async () => {
+    if (!user) {
+      alert("You must be logged in to create a team.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "teams"), {
+        ...team,
+        coachId: user.uid,
+        coachEmail: user.email,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Team created!");
+
+      setTeam({
+        teamName: "",
+        organization: "",
+        ageGroup: "",
+      });
+
+      await loadSavedTeams(user);
+    } catch (error) {
+      console.error("Error saving team:", error);
+      alert("Something went wrong creating the team.");
+    }
+  };
+
+  const deleteTeam = async (teamId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this team?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "teams", teamId));
+      await loadSavedTeams(user);
+      alert("Team deleted.");
+    } catch (error) {
+      console.error("Error deleting team:", error);
+      alert("Something went wrong deleting the team.");
+    }
+  };
+
   const loadPlayerIntoForm = (savedPlayer) => {
     setPlayer({
       name: savedPlayer.name || "",
@@ -216,52 +303,8 @@ function App() {
 
   const renderPage = () => {
     if (page === "home") {
-      return (
-        <header className="landing-hero">
-          <img
-            src={levelUpLogo}
-            alt="LevelUp Football"
-            className="landing-logo"
-          />
-
-          <p className="eyebrow">Youth Football Development Platform</p>
-
-          <h1>Get in the Game.</h1>
-
-          <p className="hero-copy">
-            Create player cards, track progress, and give coaches and parents
-            one place to celebrate every athlete’s growth.
-          </p>
-
-          <div className="hero-actions">
-            <button className="signup-btn" onClick={() => goToPage("signup")}>
-              Create Account
-            </button>
-
-            <button className="login-btn" onClick={() => goToPage("login")}>
-              Login
-            </button>
-          </div>
-
-          <div className="feature-grid">
-            <div className="feature-card">
-              <h3>Player Cards</h3>
-              <p>Digital rookie-style cards with photos, stats, and strengths.</p>
-            </div>
-
-            <div className="feature-card">
-              <h3>Team Rosters</h3>
-              <p>Coach-managed rosters built around player development.</p>
-            </div>
-
-            <div className="feature-card">
-              <h3>Parent Access</h3>
-              <p>Parents can follow progress and view their athlete’s card.</p>
-            </div>
-          </div>
-        </header>
-      );
-    }
+  return <LandingPage goToPage={goToPage} />;
+}
 
     if (page === "cards" && !isLoggedIn) {
       return (
@@ -356,7 +399,9 @@ function App() {
               {accountType === "coach" ? "Coach Dashboard" : "Parent Dashboard"}
             </p>
 
-            <h1>{selectedPlayerId ? "Update Player Card" : "Create Player Card"}</h1>
+            <h1>
+              {selectedPlayerId ? "Update Player Card" : "Create Player Card"}
+            </h1>
 
             <p>
               {selectedPlayerId
@@ -366,47 +411,41 @@ function App() {
           </section>
 
           <main className="card-builder">
-         
+            <PlayerForm
+              player={player}
+              handleChange={handleChange}
+              handlePhotoUpload={handlePhotoUpload}
+              accountType={accountType}
+              savePlayerCard={savePlayerCard}
+              updatePlayerCard={updatePlayerCard}
+              startNewCard={startNewCard}
+              selectedPlayerId={selectedPlayerId}
+            />
 
             <section className="preview-section">
               <h2>Player Card Preview</h2>
               <PlayerCard player={player} />
             </section>
           </main>
-          <PlayerForm
-          player={player}
-          handleChange={handleChange}
-          handlePhotoUpload={handlePhotoUpload}
-          accountType={accountType}
-          savePlayerCard={savePlayerCard}
-          updatePlayerCard={updatePlayerCard}
-          startNewCard={startNewCard}
-          selectedPlayerId={selectedPlayerId}
-        />
 
-                  <SavedPlayers
-          savedPlayers={savedPlayers}
-          loadPlayerIntoForm={loadPlayerIntoForm}
-          deletePlayerCard={deletePlayerCard}
-/>
+          <SavedPlayers
+            savedPlayers={savedPlayers}
+            loadPlayerIntoForm={loadPlayerIntoForm}
+            deletePlayerCard={deletePlayerCard}
+          />
         </>
       );
     }
 
     if (isLoggedIn && page === "teams") {
       return (
-        <section className="page-card">
-          <h1>Team Dashboard</h1>
-          <p>
-            Coaches will create teams, manage rosters, and update player cards
-            from here.
-          </p>
-
-          <div className="team-placeholder">
-            <h2>GAS Elite Mavericks</h2>
-            <p>Roster tools coming soon.</p>
-          </div>
-        </section>
+        <TeamDashboard
+          team={team}
+          savedTeams={savedTeams}
+          handleTeamChange={handleTeamChange}
+          saveTeam={saveTeam}
+          deleteTeam={deleteTeam}
+        />
       );
     }
 
@@ -415,14 +454,13 @@ function App() {
 
   return (
     <div className="app">
-      
-    <Navbar
-  isLoggedIn={isLoggedIn}
-  accountType={accountType}
-  user={user}
-  goToPage={goToPage}
-  logout={logout}
-/>
+      <Navbar
+        isLoggedIn={isLoggedIn}
+        accountType={accountType}
+        user={user}
+        goToPage={goToPage}
+        logout={logout}
+      />
 
       {renderPage()}
     </div>
