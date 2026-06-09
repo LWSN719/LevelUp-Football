@@ -522,3 +522,39 @@ textarea {
   color: #f87171 !important;
   border: 1px solid rgba(248, 113, 113, 0.65) !important;
 }
+.team-assign-box {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.team-assign-box select {
+  width: 100%;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: #020617;
+  color: white;
+  border-radius: 12px;
+  padding: 0.9rem;
+  font-size: 1rem;
+}
+
+.assigned-roster {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.assigned-roster h4 {
+  color: #d4af37;
+  margin: 0 0 0.75rem;
+}
+
+.roster-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #cbd5e1;
+}

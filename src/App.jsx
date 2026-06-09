@@ -40,6 +40,7 @@ function App() {
   });
 
   const [savedTeams, setSavedTeams] = useState([]);
+  const [teamAssignments, setTeamAssignments] = useState([]);
 
   const emptyPlayer = {
     name: "",
@@ -69,45 +70,55 @@ function App() {
   const loadSavedPlayers = async (currentUser) => {
     if (!currentUser) return;
 
-    try {
-      const playersQuery = query(
-        collection(db, "players"),
-        where("ownerId", "==", currentUser.uid)
-      );
+    const playersQuery = query(
+      collection(db, "players"),
+      where("ownerId", "==", currentUser.uid)
+    );
 
-      const snapshot = await getDocs(playersQuery);
+    const snapshot = await getDocs(playersQuery);
 
-      const players = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      }));
+    const players = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
 
-      setSavedPlayers(players);
-    } catch (error) {
-      console.error("Error loading saved players:", error);
-    }
+    setSavedPlayers(players);
   };
 
   const loadSavedTeams = async (currentUser) => {
     if (!currentUser) return;
 
-    try {
-      const teamsQuery = query(
-        collection(db, "teams"),
-        where("coachId", "==", currentUser.uid)
-      );
+    const teamsQuery = query(
+      collection(db, "teams"),
+      where("coachId", "==", currentUser.uid)
+    );
 
-      const snapshot = await getDocs(teamsQuery);
+    const snapshot = await getDocs(teamsQuery);
 
-      const teams = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      }));
+    const teams = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
 
-      setSavedTeams(teams);
-    } catch (error) {
-      console.error("Error loading teams:", error);
-    }
+    setSavedTeams(teams);
+  };
+
+  const loadTeamAssignments = async (currentUser) => {
+    if (!currentUser) return;
+
+    const assignmentsQuery = query(
+      collection(db, "teamPlayers"),
+      where("coachId", "==", currentUser.uid)
+    );
+
+    const snapshot = await getDocs(assignmentsQuery);
+
+    const assignments = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data(),
+    }));
+
+    setTeamAssignments(assignments);
   };
 
   useEffect(() => {
@@ -118,6 +129,7 @@ function App() {
 
         await loadSavedPlayers(currentUser);
         await loadSavedTeams(currentUser);
+        await loadTeamAssignments(currentUser);
       } else {
         setUser(null);
         setIsLoggedIn(false);
@@ -156,6 +168,7 @@ function App() {
 
       await loadSavedPlayers(result.user);
       await loadSavedTeams(result.user);
+      await loadTeamAssignments(result.user);
 
       if (type === "coach") {
         goToPage("teams");
@@ -176,6 +189,7 @@ function App() {
     setAccountType("");
     setSavedPlayers([]);
     setSavedTeams([]);
+    setTeamAssignments([]);
     setSelectedPlayerId(null);
     setPlayer(emptyPlayer);
 
@@ -290,10 +304,54 @@ function App() {
     try {
       await deleteDoc(doc(db, "teams", teamId));
       await loadSavedTeams(user);
+      await loadTeamAssignments(user);
       alert("Team deleted.");
     } catch (error) {
       console.error("Error deleting team:", error);
       alert("Something went wrong deleting the team.");
+    }
+  };
+
+  const assignPlayerToTeam = async (teamId, playerId) => {
+    if (!playerId) {
+      alert("Select a player first.");
+      return;
+    }
+
+    const alreadyAssigned = teamAssignments.some(
+      (assignment) =>
+        assignment.teamId === teamId && assignment.playerId === playerId
+    );
+
+    if (alreadyAssigned) {
+      alert("That player is already on this team.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "teamPlayers"), {
+        teamId,
+        playerId,
+        coachId: user.uid,
+        coachEmail: user.email,
+        createdAt: serverTimestamp(),
+      });
+
+      alert("Player added to team!");
+      await loadTeamAssignments(user);
+    } catch (error) {
+      console.error("Error assigning player:", error);
+      alert("Something went wrong assigning the player.");
+    }
+  };
+
+  const removePlayerFromTeam = async (assignmentId) => {
+    try {
+      await deleteDoc(doc(db, "teamPlayers", assignmentId));
+      await loadTeamAssignments(user);
+    } catch (error) {
+      console.error("Error removing player:", error);
+      alert("Something went wrong removing the player.");
     }
   };
 
@@ -434,9 +492,13 @@ function App() {
         <TeamDashboard
           team={team}
           savedTeams={savedTeams}
+          savedPlayers={savedPlayers}
+          teamAssignments={teamAssignments}
           handleTeamChange={handleTeamChange}
           saveTeam={saveTeam}
           deleteTeam={deleteTeam}
+          assignPlayerToTeam={assignPlayerToTeam}
+          removePlayerFromTeam={removePlayerFromTeam}
         />
       );
     }
