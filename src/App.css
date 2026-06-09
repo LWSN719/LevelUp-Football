@@ -454,3 +454,71 @@ textarea {
   display: block;
   margin: 0 auto 1rem;
 }
+.saved-players-section {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 24px;
+}
+
+.saved-players-section h2 {
+  color: #d4af37;
+  margin-top: 0;
+}
+
+.saved-player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.saved-player-card {
+  background: #020617;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.saved-player-card h3 {
+  margin: 0;
+  color: white;
+}
+
+.saved-player-card p {
+  color: #cbd5e1;
+}
+
+.saved-player-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.delete-player-btn {
+  background: transparent !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.65) !important;
+}
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.form-actions button {
+  flex: 1;
+}
+
+.saved-player-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.delete-player-btn {
+  background: transparent !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.65) !important;
+}
