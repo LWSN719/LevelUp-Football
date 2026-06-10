@@ -1,7 +1,9 @@
 function SavedPlayers({
   savedPlayers,
+  savedTeams,
   loadPlayerIntoForm,
   deletePlayerCard,
+  requestToJoinTeam,
 }) {
   return (
     <section className="saved-players-section">
@@ -31,6 +33,35 @@ function SavedPlayers({
                 >
                   Delete
                 </button>
+              </div>
+
+              <div className="team-assign-box">
+                <select
+                  defaultValue=""
+                  onChange={(event) => {
+                    const selectedTeam = savedTeams.find(
+                      (team) => team.id === event.target.value
+                    );
+
+                    if (selectedTeam) {
+                      requestToJoinTeam(
+                        selectedTeam.id,
+                        selectedTeam.teamName,
+                        savedPlayer.id,
+                        savedPlayer.name
+                      );
+                    }
+                  }}
+                >
+                  <option value="">Request to Join Team</option>
+
+                  {savedTeams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.organization || "Organization"} -{" "}
+                      {team.teamName || "Team"} ({team.ageGroup || "Age Group"})
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           ))}

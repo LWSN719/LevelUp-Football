@@ -312,36 +312,33 @@ function App() {
     }
   };
 
-  const assignPlayerToTeam = async (teamId, playerId) => {
-    if (!playerId) {
-      alert("Select a player first.");
+  const requestToJoinTeam = async (teamId, teamName, playerId, playerName) => {
+    if (!user) {
+      alert("You must be logged in.");
       return;
     }
 
-    const alreadyAssigned = teamAssignments.some(
-      (assignment) =>
-        assignment.teamId === teamId && assignment.playerId === playerId
-    );
-
-    if (alreadyAssigned) {
-      alert("That player is already on this team.");
+    if (!playerId) {
+      alert("Select or load a player first.");
       return;
     }
 
     try {
-      await addDoc(collection(db, "teamPlayers"), {
+      await addDoc(collection(db, "teamRequests"), {
         teamId,
+        teamName,
         playerId,
-        coachId: user.uid,
-        coachEmail: user.email,
+        playerName,
+        parentId: user.uid,
+        parentEmail: user.email,
+        status: "pending",
         createdAt: serverTimestamp(),
       });
 
-      alert("Player added to team!");
-      await loadTeamAssignments(user);
+      alert("Request sent to coach for approval!");
     } catch (error) {
-      console.error("Error assigning player:", error);
-      alert("Something went wrong assigning the player.");
+      console.error("Error requesting team join:", error);
+      alert("Something went wrong sending the request.");
     }
   };
 
@@ -480,8 +477,10 @@ function App() {
 
           <SavedPlayers
             savedPlayers={savedPlayers}
+            savedTeams={savedTeams}
             loadPlayerIntoForm={loadPlayerIntoForm}
             deletePlayerCard={deletePlayerCard}
+            requestToJoinTeam={requestToJoinTeam}
           />
         </>
       );
@@ -497,7 +496,6 @@ function App() {
           handleTeamChange={handleTeamChange}
           saveTeam={saveTeam}
           deleteTeam={deleteTeam}
-          assignPlayerToTeam={assignPlayerToTeam}
           removePlayerFromTeam={removePlayerFromTeam}
         />
       );

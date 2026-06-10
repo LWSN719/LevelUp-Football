@@ -558,3 +558,181 @@ textarea {
   margin-bottom: 0.75rem;
   color: #cbd5e1;
 }
+/* BLACK / GOLD / WHITE THEME */
+
+:root {
+  --bg: #050505;
+  --bg-2: #0b0b0d;
+  --card: #111113;
+  --card-2: #17171a;
+  --primary: #d4af37;
+  --primary-bright: #f5c84c;
+  --text: #ffffff;
+  --muted: #d1d5db;
+  --border: rgba(255, 255, 255, 0.12);
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(212, 175, 55, 0.18), transparent 35%),
+    linear-gradient(180deg, var(--bg), var(--bg-2));
+  color: var(--text);
+}
+
+.top-nav,
+.landing-hero,
+.page-card,
+.dashboard-header,
+.form-card,
+.preview-section,
+.saved-players-section,
+.team-placeholder,
+.saved-player-card {
+  background: linear-gradient(180deg, var(--card), #070707) !important;
+  border: 1px solid rgba(212, 175, 55, 0.45) !important;
+}
+
+.nav-brand,
+.eyebrow,
+.feature-card h3,
+.form-card h2,
+.preview-section h2,
+.saved-players-section h2,
+.team-placeholder h2,
+.page-card h1,
+.dashboard-header h1 {
+  color: var(--text) !important;
+}
+
+.nav-brand {
+  text-shadow: 0 0 18px rgba(212, 175, 55, 0.55);
+}
+
+.landing-hero h1 {
+  color: var(--text) !important;
+  text-shadow:
+    0 0 25px rgba(212, 175, 55, 0.55),
+    0 6px 0 rgba(0, 0, 0, 0.75);
+}
+
+.eyebrow {
+  color: var(--primary-bright) !important;
+}
+
+.hero-copy,
+.feature-card p,
+.page-card p,
+.dashboard-header p,
+.saved-player-card p,
+.teams-preview p {
+  color: var(--muted) !important;
+}
+
+.signup-btn {
+  background: var(--primary) !important;
+  color: #050505 !important;
+  border: 1px solid var(--primary-bright) !important;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.35);
+}
+
+.signup-btn:hover {
+  background: var(--primary-bright) !important;
+}
+
+.login-btn {
+  background: transparent !important;
+  color: white !important;
+  border: 1px solid var(--primary) !important;
+}
+
+.login-btn:hover {
+  background: rgba(212, 175, 55, 0.18) !important;
+}
+
+.nav-links button {
+  color: white !important;
+}
+
+.nav-links button:hover {
+  background: rgba(212, 175, 55, 0.18) !important;
+}
+
+.account-pill {
+  color: white !important;
+  border: 1px solid var(--primary) !important;
+  background: rgba(212, 175, 55, 0.14);
+}
+
+.feature-card {
+  background: linear-gradient(180deg, var(--card-2), #080808) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+}
+
+input,
+textarea,
+select {
+  background: #050505 !important;
+  color: white !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-bright) !important;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.22) !important;
+}
+
+.player-card {
+  background: var(--primary) !important;
+}
+
+.card-inner {
+  background: linear-gradient(180deg, #1a1a1d, #090909) !important;
+  border-color: white !important;
+  color: white !important;
+}
+
+.card-header-row h2,
+.card-brand {
+  color: white !important;
+}
+
+.position-pill,
+.team-strip,
+.card-stats div,
+.card-ability,
+.coach-note,
+.card-photo-frame {
+  background: #050505 !important;
+  color: white !important;
+  border-color: rgba(212, 175, 55, 0.6) !important;
+}
+
+.card-stats strong,
+.ability-title strong,
+.coach-note strong {
+  color: var(--primary-bright) !important;
+}
+
+.delete-player-btn {
+  background: transparent !important;
+  color: #ff6b6b !important;
+  border: 1px solid rgba(255, 107, 107, 0.75) !important;
+}
+
+.team-card-hand {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 320px));
+  gap: 1.25rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.team-card-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
