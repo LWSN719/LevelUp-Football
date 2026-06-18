@@ -16,10 +16,9 @@ import { auth, googleProvider, db } from "./firebase";
 import Navbar from "./components/Navbar";
 import LandingPage from "./components/LandingPage";
 import AuthPage from "./components/AuthPage";
-import PlayerForm from "./components/PlayerForm";
-import PlayerCard from "./components/PlayerCard";
-import SavedPlayers from "./components/SavedPlayers";
 import TeamDashboard from "./components/TeamDashboard";
+import ParentHQ from "./components/ParentHQ";
+import CoachHQ from "./components/CoachHQ";
 import "./App.css";
 
 function App() {
@@ -32,13 +31,6 @@ function App() {
 
   const [savedPlayers, setSavedPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState(null);
-
-  const [team, setTeam] = useState({
-    teamName: "",
-    organization: "",
-    ageGroup: "",
-  });
-
   const [savedTeams, setSavedTeams] = useState([]);
   const [teamAssignments, setTeamAssignments] = useState([]);
 
@@ -152,11 +144,6 @@ function App() {
     }
   };
 
-  const handleTeamChange = (event) => {
-    const { name, value } = event.target;
-    setTeam({ ...team, [name]: value });
-  };
-
   const loginWithGoogle = async (type) => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -170,11 +157,7 @@ function App() {
       await loadSavedTeams(result.user);
       await loadTeamAssignments(result.user);
 
-      if (type === "coach") {
-        goToPage("teams");
-      } else {
-        goToPage("cards");
-      }
+      goToPage(type === "coach" ? "cards" : "cards");
     } catch (error) {
       console.error("Google login error:", error);
       alert("Google login failed. Check the console for details.");
@@ -262,35 +245,6 @@ function App() {
     } catch (error) {
       console.error("Error deleting player card:", error);
       alert("Something went wrong deleting the card.");
-    }
-  };
-
-  const saveTeam = async () => {
-    if (!user) {
-      alert("You must be logged in to create a team.");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "teams"), {
-        ...team,
-        coachId: user.uid,
-        coachEmail: user.email,
-        createdAt: serverTimestamp(),
-      });
-
-      alert("Team created!");
-
-      setTeam({
-        teamName: "",
-        organization: "",
-        ageGroup: "",
-      });
-
-      await loadSavedTeams(user);
-    } catch (error) {
-      console.error("Error saving team:", error);
-      alert("Something went wrong creating the team.");
     }
   };
 
@@ -410,10 +364,6 @@ function App() {
             Team pages will allow coaches to manage rosters, view player cards,
             update strengths, and add coach notes.
           </p>
-          <p>
-            Coach tools are coming soon. Login or create an account to prepare
-            your team profile.
-          </p>
         </section>
       );
     }
@@ -432,69 +382,43 @@ function App() {
       return (
         <AuthPage
           title="Create Account"
-          description="Choose how you want to use LevelUp Football."
+          description="Choose how you want to use NextUp Football."
           loginWithGoogle={loginWithGoogle}
         />
       );
     }
 
     if (isLoggedIn && page === "cards") {
-      return (
-        <>
-          <section className="dashboard-header">
-            <p className="eyebrow">
-              {accountType === "coach" ? "Coach Dashboard" : "Parent Dashboard"}
-            </p>
-
-            <h1>
-              {selectedPlayerId ? "Update Player Card" : "Create Player Card"}
-            </h1>
-
-            <p>
-              {selectedPlayerId
-                ? "You are editing a saved player card."
-                : "Build a digital player card with photos, stats, strengths, and notes."}
-            </p>
-          </section>
-
-          <main className="card-builder">
-            <PlayerForm
-              player={player}
-              handleChange={handleChange}
-              handlePhotoUpload={handlePhotoUpload}
-              accountType={accountType}
-              savePlayerCard={savePlayerCard}
-              updatePlayerCard={updatePlayerCard}
-              startNewCard={startNewCard}
-              selectedPlayerId={selectedPlayerId}
-            />
-
-            <section className="preview-section">
-              <h2>Player Card Preview</h2>
-              <PlayerCard player={player} />
-            </section>
-          </main>
-
-          <SavedPlayers
-            savedPlayers={savedPlayers}
-            savedTeams={savedTeams}
-            loadPlayerIntoForm={loadPlayerIntoForm}
-            deletePlayerCard={deletePlayerCard}
-            requestToJoinTeam={requestToJoinTeam}
-          />
-        </>
+      return accountType === "coach" ? (
+        <CoachHQ
+          user={user}
+          loadTeamAssignments={loadTeamAssignments}
+          teamAssignments={teamAssignments} />
+      ) : (
+        <ParentHQ
+          player={player}
+          handleChange={handleChange}
+          handlePhotoUpload={handlePhotoUpload}
+          accountType={accountType}
+          savePlayerCard={savePlayerCard}
+          updatePlayerCard={updatePlayerCard}
+          startNewCard={startNewCard}
+          selectedPlayerId={selectedPlayerId}
+          savedPlayers={savedPlayers}
+          savedTeams={savedTeams}
+          loadPlayerIntoForm={loadPlayerIntoForm}
+          deletePlayerCard={deletePlayerCard}
+          requestToJoinTeam={requestToJoinTeam}
+        />
       );
     }
 
     if (isLoggedIn && page === "teams") {
       return (
         <TeamDashboard
-          team={team}
           savedTeams={savedTeams}
           savedPlayers={savedPlayers}
           teamAssignments={teamAssignments}
-          handleTeamChange={handleTeamChange}
-          saveTeam={saveTeam}
           deleteTeam={deleteTeam}
           removePlayerFromTeam={removePlayerFromTeam}
         />

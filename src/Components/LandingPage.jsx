@@ -1,17 +1,17 @@
-import levelUpLogo from "../assets/levelup-logo.png";
+import NextUpLogo from "../assets/NextUp-logo.png";
 
 function LandingPage({ goToPage }) {
   return (
     <header className="landing-hero">
       <img
-        src={levelUpLogo}
-        alt="LevelUp Football"
+        src={NextUpLogo}
+        alt="NextUp Football"
         className="landing-logo"
       />
 
       <p className="eyebrow">Youth Football Development Platform</p>
 
-      <h1>Get in the Game.</h1>
+      <h1>Get in the Game</h1>
 
       <p className="hero-copy">
         Create player cards, track progress, and give coaches and parents one

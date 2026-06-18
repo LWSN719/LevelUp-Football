@@ -2,7 +2,7 @@ function Navbar({ isLoggedIn, accountType, user, goToPage, logout }) {
   return (
     <nav className="top-nav">
       <div className="nav-brand" onClick={() => goToPage("home")}>
-        LevelUp Football
+        NextUp Football
       </div>
 
       <div className="nav-links">

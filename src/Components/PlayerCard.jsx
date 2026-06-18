@@ -1,4 +1,4 @@
-function PlayerCard({ player }) {
+function PlayerCard({ player, wentWell = [], needsWork = [], coachNote = "" }) {
   return (
     <div className="player-card">
       <div className="card-inner">
@@ -7,7 +7,7 @@ function PlayerCard({ player }) {
           <span className="position-pill">{player.position || "POS"}</span>
         </div>
 
-        <p className="card-brand">LEVELUP FOOTBALL</p>
+        <p className="card-brand">NEXTUP FOOTBALL</p>
 
         <div className="card-photo-frame">
           {player.photo ? (
@@ -38,31 +38,39 @@ function PlayerCard({ player }) {
           </div>
         </div>
 
-        <div className="card-ability">
-          <div className="ability-title">
-            <span>⚡</span>
-            <strong>{player.strengthOne || "Strength One"}</strong>
-          </div>
-          <p>
-            {player.strengthOneDescription ||
-              "Strength description goes here."}
-          </p>
+        <div className="card-feedback">
+          <strong>Went Well</strong>
+          {wentWell.length > 0 ? (
+            <div className="mini-tag-list">
+              {wentWell.map((item) => (
+                <span key={item} className="mini-tag positive">
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p>No strengths selected yet.</p>
+          )}
         </div>
 
-        <div className="card-ability">
-          <div className="ability-title">
-            <span>🧱</span>
-            <strong>{player.strengthTwo || "Strength Two"}</strong>
-          </div>
-          <p>
-            {player.strengthTwoDescription ||
-              "Strength description goes here."}
-          </p>
+        <div className="card-feedback">
+          <strong>Needs to Work On</strong>
+          {needsWork.length > 0 ? (
+            <div className="mini-tag-list">
+              {needsWork.map((item) => (
+                <span key={item} className="mini-tag focus">
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p>No focus areas selected yet.</p>
+          )}
         </div>
 
         <div className="coach-note">
           <strong>Coach Note</strong>
-          <p>{player.coachNote || "Coach note will appear here."}</p>
+          <p>{coachNote || player.coachNote || "Coach note will appear here."}</p>
         </div>
       </div>
     </div>

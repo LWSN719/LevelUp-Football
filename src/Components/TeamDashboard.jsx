@@ -1,12 +1,9 @@
 import PlayerCard from "./PlayerCard";
 
 function TeamDashboard({
-  team,
   savedTeams,
   savedPlayers,
   teamAssignments,
-  handleTeamChange,
-  saveTeam,
   deleteTeam,
   removePlayerFromTeam,
 }) {
@@ -31,43 +28,12 @@ function TeamDashboard({
 
   return (
     <section className="page-card">
-      <h1>Team Dashboard</h1>
-      <p>Create teams, review join requests, and manage your roster.</p>
-
-      <div className="team-placeholder">
-        <h2>Create Team</h2>
-
-        <input
-          name="teamName"
-          placeholder="Team Name"
-          value={team.teamName}
-          onChange={handleTeamChange}
-        />
-
-        <input
-          name="organization"
-          placeholder="Organization"
-          value={team.organization}
-          onChange={handleTeamChange}
-        />
-
-        <input
-          name="ageGroup"
-          placeholder="Age Group"
-          value={team.ageGroup}
-          onChange={handleTeamChange}
-        />
-
-        <button className="signup-btn" onClick={saveTeam}>
-          Save Team
-        </button>
-      </div>
+      <h1>My Teams</h1>
+      <p>View your assigned teams, roster cards, and pending player requests.</p>
 
       <div className="saved-players-section">
-        <h2>My Teams</h2>
-
         {savedTeams.length === 0 ? (
-          <p>No teams created yet.</p>
+          <p>No teams assigned yet.</p>
         ) : (
           <div className="saved-player-grid">
             {savedTeams.map((savedTeam) => {
@@ -111,7 +77,7 @@ function TeamDashboard({
                     className="delete-player-btn"
                     onClick={() => deleteTeam(savedTeam.id)}
                   >
-                    Delete Team
+                    Remove Team
                   </button>
                 </div>
               );
